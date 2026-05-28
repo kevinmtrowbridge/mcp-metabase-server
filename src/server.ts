@@ -112,11 +112,22 @@ export class MetabaseServer {
             throw error;
           }
           if (axios.isAxiosError(error)) {
+            const data = error.response?.data;
+            let detail: string;
+            if (typeof data === "string") {
+              detail = data;
+            } else if (data?.message) {
+              detail = data.message;
+            } else if (data?.error) {
+              detail = data.error;
+            } else if (data) {
+              detail = JSON.stringify(data);
+            } else {
+              detail = error.message;
+            }
             throw new McpError(
               ErrorCode.InternalError,
-              `Metabase API error: ${
-                error.response?.data?.message || error.message
-              }`
+              `Metabase API error (${error.response?.status || "unknown"}): ${detail}`
             );
           }
           throw new McpError(
@@ -157,13 +168,26 @@ export class MetabaseServer {
         }
 
         if (axios.isAxiosError(error)) {
+          // Extract the most useful error info from Metabase's response.
+          // Metabase returns errors in various shapes: plain string, { message }, { error }, or nested objects.
+          const data = error.response?.data;
+          let detail: string;
+          if (typeof data === "string") {
+            detail = data;
+          } else if (data?.message) {
+            detail = data.message;
+          } else if (data?.error) {
+            detail = data.error;
+          } else if (data) {
+            detail = JSON.stringify(data);
+          } else {
+            detail = error.message;
+          }
           return {
             content: [
               {
                 type: "text",
-                text: `Metabase API error: ${
-                  error.response?.data?.message || error.message
-                }`,
+                text: `Metabase API error (${error.response?.status || "unknown"}): ${detail}`,
               },
             ],
             isError: true,

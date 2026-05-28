@@ -42,6 +42,9 @@
   ],
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\" && mkdir -p dist && cp -r build/* dist/",
+    "check": "tsc --noEmit",
+    "bundle": "npm run check && node build-bundle.mjs",
+    "predeploy": "npm run bundle",
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector dist/index.js",
     "start": "node dist/index.js",
@@ -60,6 +63,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.22",
+    "esbuild": "^0.28.0",
     "typescript": "^5.3.3"
   }
 }
